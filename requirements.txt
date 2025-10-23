@@ -1,0 +1,6 @@
+pytest==8.4.2
+allure-pytest==2.15.0
+selenium==4.37.0
+webdriver-manager==4.0.2
+Faker==37.11.0
+requests==2.32.5
