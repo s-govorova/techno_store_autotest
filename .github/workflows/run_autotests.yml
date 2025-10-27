@@ -9,20 +9,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Копирование файлов репозитория
         uses: actions/checkout@v3
 
-      - name: Setup Docker Compose
+      - name: Установка Docker
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
 
-      - name: Start Kafka infrastructure
+      - name: Поднятие docker compose инфраструктуры techno-store
         run: |
           docker compose up -d
           sleep 20
 
-      - name: Start store application
+      - name: Поднятие клиента из докерхаба ereshkigall/store:1.0.0
         run: |
           docker run -d \
             --name store_app \
@@ -32,17 +32,17 @@ jobs:
             ereshkigall/store:1.0.0
           sleep 25
 
-      - name: Setup Python
+      - name: Устанавливаем Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Устанавливаем зависимости проекта (requirements.txt)
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Selenium tests
+      - name: Запускаем selenium тесты
         run: pytest -v --alluredir=allure-results
 
       - name: Upload Allure results
