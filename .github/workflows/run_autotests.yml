@@ -1,0 +1,59 @@
+---
+name: Selenium UI tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Start Kafka infrastructure
+        run: |
+          docker compose up -d
+          sleep 20
+
+      - name: Start store application
+        run: |
+          docker run -d \
+            --name store_app \
+            --network=kafka_cluster_local-kafka \
+            -e EXTERNAL_GET_PRODUCT_URL=http://localhost:8080/external/products/findAll \
+            -p 8080:8080 \
+            ereshkigall/store:1.0.0
+          sleep 25
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run Selenium tests
+        run: pytest -v --alluredir=allure-results
+
+      - name: Upload Allure results
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+
+      - name: Stop environment
+        if: always()
+        run: |
+          docker compose down
+          docker stop store_app || true
+          docker rm store_app || true

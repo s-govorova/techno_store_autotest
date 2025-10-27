@@ -13,6 +13,7 @@ def init_driver():
     options = Options()
     options.add_argument("--window-size=1920,1080")
     options.add_argument("--incognito")
+    options.add_argument("--headless")
     driver = webdriver.Chrome(service=chrome_driver_install, options=options)
     yield driver
     driver.quit()
